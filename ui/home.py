@@ -17,13 +17,13 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QDoubleSpinBox,
                                QProgressBar, QPushButton, QSizePolicy,
                                QSlider, QSpacerItem, QSpinBox, QSplitter,
                                QVBoxLayout, QWidget)
-
+import ui.resources_rc
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1220, 725)
+        MainWindow.resize(1234, 725)
         self.Main_QW = QWidget(MainWindow)
         self.Main_QW.setObjectName(u"Main_QW")
         self.verticalLayout = QVBoxLayout(self.Main_QW)
@@ -242,8 +242,6 @@ class Ui_MainWindow(object):
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.verticalLayout_5.addItem(self.verticalSpacer)
-
-        self.verticalLayout_5.setStretch(0, 1)
 
         self.verticalLayout_2.addWidget(self.MenuBox)
 
@@ -1528,40 +1526,41 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.Author.setText(QCoreApplication.translate("MainWindow", u"By javier", None))
-        self.Title.setText(QCoreApplication.translate("MainWindow", u"YoloSide", None))
-        self.ToggleBotton.setText(QCoreApplication.translate("MainWindow", u"Hide", None))
-        self.src_file_button.setText(QCoreApplication.translate("MainWindow", u"Local File", None))
-        self.src_cam_button.setText(QCoreApplication.translate("MainWindow", u"Camera", None))
+        self.Title.setText(QCoreApplication.translate("MainWindow", u"YOLOv8", None))
+        self.ToggleBotton.setText(QCoreApplication.translate("MainWindow", u"\u9690\u85cf", None))
+        self.src_file_button.setText(QCoreApplication.translate("MainWindow", u"\u672c\u5730\u6587\u4ef6", None))
+        self.src_cam_button.setText(QCoreApplication.translate("MainWindow", u"\u6444\u50cf\u5934", None))
         self.src_rtsp_button.setText(QCoreApplication.translate("MainWindow", u"Rtsp", None))
-        self.VersionLabel.setText(QCoreApplication.translate("MainWindow", u"Version: 2.0", None))
-        self.explain_title.setText(QCoreApplication.translate("MainWindow",
-                                                              u"\u57fa\u4e8eYOLOv8\u7684\u706b\u7130\u68c0\u6d4b\u62a5\u8b66\u7cfb\u7edf",
-                                                              None))
+        self.VersionLabel.setText(QCoreApplication.translate("MainWindow", u"Version: 1.0", None))
+        self.explain_title.setText(
+            QCoreApplication.translate("MainWindow", u"\u706b\u7130\u8bc6\u522b\u62a5\u8b66\u7cfb\u7edf", None))
         self.settings_button.setText("")
         self.min_sf.setText("")
         self.max_sf.setText("")
         self.close_button.setText("")
         self.char_label.setText(QCoreApplication.translate("MainWindow", u"Detection", None))
-        self.label_5.setText(QCoreApplication.translate("MainWindow", u"Total Classes", None))
+        self.label_5.setText(QCoreApplication.translate("MainWindow", u"\u603b\u7c7b\u522b", None))
         self.Class_num.setText("")
-        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Total Targets", None))
+        self.label_6.setText(QCoreApplication.translate("MainWindow", u"\u603b\u76ee\u6807", None))
         self.Target_num.setText("")
-        self.label_7.setText(QCoreApplication.translate("MainWindow", u"Fps", None))
+        self.label_7.setText(QCoreApplication.translate("MainWindow", u"\u5e27\u6570(Fps)", None))
         self.fps_label.setText("")
-        self.label_8.setText(QCoreApplication.translate("MainWindow", u"Use Model", None))
+        self.label_8.setText(QCoreApplication.translate("MainWindow", u"\u4f7f\u7528\u6a21\u578b", None))
         self.Model_name.setText("")
         self.pre_video.setText("")
         self.res_video.setText("")
         self.run_button.setText("")
         self.stop_button.setText("")
-        self.label.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
-        self.ToggleBotton_6.setText(QCoreApplication.translate("MainWindow", u"Model", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"\u8bbe\u7f6e", None))
+        self.ToggleBotton_6.setText(QCoreApplication.translate("MainWindow", u"\u6a21\u578b", None))
         self.model_box.setPlaceholderText("")
-        self.ToggleBotton_2.setText(QCoreApplication.translate("MainWindow", u"IOU", None))
-        self.ToggleBotton_3.setText(QCoreApplication.translate("MainWindow", u"Conf", None))
-        self.ToggleBotton_4.setText(QCoreApplication.translate("MainWindow", u"Delay(ms)", None))
-        self.ToggleBotton_5.setText(QCoreApplication.translate("MainWindow", u"Save", None))
-        self.save_res_button.setText(QCoreApplication.translate("MainWindow", u"Save MP4/JPG", None))
-        self.save_txt_button.setText(QCoreApplication.translate("MainWindow", u"Save Labels(.txt)", None))
-        self.status_bar.setText(QCoreApplication.translate("MainWindow", u"Welcome!", None))
+        self.ToggleBotton_2.setText(QCoreApplication.translate("MainWindow", u"\u6807\u51c6(IOU)", None))
+        self.ToggleBotton_3.setText(QCoreApplication.translate("MainWindow", u"\u7f6e\u4fe1\u5ea6(Conf)", None))
+        self.ToggleBotton_4.setText(QCoreApplication.translate("MainWindow", u"\u5ef6\u65f6(ms)", None))
+        self.ToggleBotton_5.setText(QCoreApplication.translate("MainWindow", u"\u4fdd\u5b58", None))
+        self.save_res_button.setText(QCoreApplication.translate("MainWindow", u"\u4fdd\u5b58\u4e3a MP4/JPG", None))
+        self.save_txt_button.setText(QCoreApplication.translate("MainWindow", u"\u4fdd\u5b58\u4e3a Labels(.txt)", None))
+        self.status_bar.setText(
+            QCoreApplication.translate("MainWindow", u"\u6b22\u8fce\u4f7f\u7528\u672c\u7cfb\u7edf!", None))
     # retranslateUi
+
