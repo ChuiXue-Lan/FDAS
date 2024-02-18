@@ -1,4 +1,4 @@
-from main import *
+from main import MainWindow
 from ui.utils.custom_grips import CustomGrip
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, QEvent, QTimer
 from PySide6.QtCore import *
