@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# @Time    : 2024/1/29  20:55
+# @Author  : 菠萝吹雪
+# @Software: PyCharm
+# @Describe:
+# -*- encoding:utf-8 -*-
 import threading
 import pyttsx3
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMenu
@@ -46,6 +53,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.engine = pyttsx3.init()  # 语音警示
         self.engine_switch = True  # 循环警告
 
+        # 摄像头选择
+        self.camIndex = 0  # 默认为0号（本机）摄像头
+        self.isCam = False
+
         # Yolo-v8 线程
         self.yolo_predict = classes.yolo.YoloPredictor()  # 创建一个Yolo实例
         self.select_model = self.model_box.currentText()  # 默认模型
@@ -81,7 +92,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # 选择检测源
         self.src_file_button.clicked.connect(self.open_src_file)  # 选择本地文件
-        # self.src_cam_button.clicked.connect(self.chose_cam)  # chose_cam
         self.src_cam_button.clicked.connect(self.camera_select)  # chose_cam
         self.src_rtsp_button.clicked.connect(self.chose_rtsp)  # chose_rtsp
 
@@ -121,6 +131,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             frame = cv2.cvtColor(img_src_, cv2.COLOR_BGR2RGB)
             img = QImage(frame.data, frame.shape[1], frame.shape[0], frame.shape[2] * frame.shape[1],
                          QImage.Format_RGB888)
+            # 使图像在GUI上显示出来
             label.setPixmap(QPixmap.fromImage(img))
 
         except Exception as e:
@@ -128,9 +139,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     # 控制开始/暂停
     def run_or_continue(self):
-        print('func:run_or_continue\n')
         if self.yolo_predict.source == '':
-            print('请在开始检测前选择视频源...')
             self.show_status('请在开始检测前选择视频源...')
             self.run_button.setChecked(False)
         else:
@@ -195,53 +204,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 f.write(config_json)
             self.stop()
 
-    # 选择摄像头源 have one bug
-    def chose_cam(self):
-        self.yolo_predict.camera_run()
-        # try:
-        #     self.stop()
-        #     MessageBox(
-        #         self.close_button, title='注意', text='正在加载摄像头...', time=2000, auto=True).exec()
-        #     # 获取本地摄像头数量
-        #     _, cams = Camera().get_cam_num()
-        #     popMenu = QMenu()
-        #     popMenu.setFixedWidth(self.src_cam_button.width())
-        #     popMenu.setStyleSheet('''
-        #                                     QMenu {
-        #                                     font-size: 16px;
-        #                                     font-family: "Microsoft YaHei UI";
-        #                                     font-weight: light;
-        #                                     color:white;
-        #                                     padding-left: 5px;
-        #                                     padding-right: 5px;
-        #                                     padding-top: 4px;
-        #                                     padding-bottom: 4px;
-        #                                     border-style: solid;
-        #                                     border-width: 0px;
-        #                                     border-color: rgba(255, 255, 255, 255);
-        #                                     border-radius: 3px;
-        #                                     background-color: rgba(200, 200, 200,50);}
-        #                                     ''')
-        #
-        #     for cam in cams:
-        #         exec("action_%s = QAction('%s')" % (cam, cam))
-        #         exec("popMenu.addAction(action_%s)" % cam)
-        #
-        #     x = self.src_cam_button.mapToGlobal(self.src_cam_button.pos()).x()
-        #     y = self.src_cam_button.mapToGlobal(self.src_cam_button.pos()).y()
-        #     y = y + self.src_cam_button.frameGeometry().height()
-        #     pos = QPoint(x, y)
-        #     action = popMenu.exec(pos)
-        #     if action:
-        #         self.yolo_predict.source = action.text()
-        #         self.show_status('加载摄像头：{}'.format(action.text()))
-        #
-        # # except Exception as e:
-        # #     self.show_status('%s' % e)
+    # 选择摄像头源
+    # def chose_cam(self):
+    #     self.yolo_predict.camera_run()
 
     # camera选择
     def camera_select(self):
-        print('func:camera_select\n')
         # try:
         # 关闭YOLO线程
         self.stop()
@@ -279,6 +247,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             selected_stream_source = str_temp.join(filter(str.isdigit, action.text()))  # 获取摄像头号，去除非数字字符
             self.yolo_predict.source = selected_stream_source
             self.show_status(f'摄像头设备:{action.text()}')
+            self.isCam = True
             # DialogOver(parent=self, text=f"当前摄像头为: {action.text()}", title="摄像头选择成功", flags="success")
 
     # 选择网络源
@@ -286,8 +255,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.rtsp_window = Window()
         config_file = 'config/ip.json'
         if not os.path.exists(config_file):
-            ip = "rtsp://192.168.2.72:8554/h264_ulaw.sdp"
-            # ip = "rtsp://admin:admin888@192.168.1.2:555"
+            ip = 'rtsp://admin:123456@192.168.0.106:8554/h264_ulaw.sdp'
             new_config = {"ip": ip}
             new_json = json.dumps(new_config, ensure_ascii=False, indent=2)
             with open(config_file, 'w', encoding='utf-8') as f:
@@ -424,6 +392,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.Class_num.setText('--')
         self.Target_num.setText('--')
         self.fps_label.setText('--')
+
+        # 关闭摄像头
+        if self.isCam:
+            # 遍历可能的摄像头索引号
+            for i in range(10):  # 假设摄像头索引号在 0 到 9 之间
+                cap = cv2.VideoCapture(i)
+                if cap.isOpened():
+                    print(f"摄像头 {i} 已经打开。")
+                    cap.release()  # 释放资源
+            self.isCam = False
 
     # 改变检测参数
     def change_val(self, x, flag):

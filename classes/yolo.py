@@ -10,11 +10,11 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
-import PIL
+# import PIL
+# from PIL.Image import Image
 import cv2
 import numpy as np
 import torch
-from PIL.Image import Image
 from PySide6.QtCore import QObject
 from ultralytics import YOLO
 from ultralytics.yolo.cfg import get_cfg
@@ -41,8 +41,8 @@ class YoloPredictor(BasePredictor, QObject):
     yolo2main_progress = Signal(int)  # 进度信号
     yolo2main_class_num = Signal(int)  # 检测到的类别数
     yolo2main_target_num = Signal(int)  # 检测到的目标数
-    yolo2main_tts_dialog = Signal(int)  # 火源警告
-    yolo2main_tts = Signal(int)
+    yolo2main_tts_dialog = Signal(int)  # 火源警告对话框
+    yolo2main_tts = Signal(int) # 火源警告
 
     def __init__(self, cfg=DEFAULT_CFG, overrides=None):
         super(YoloPredictor, self).__init__()
@@ -85,10 +85,9 @@ class YoloPredictor(BasePredictor, QObject):
         self.callbacks = defaultdict(list, callbacks.default_callbacks)  # 添加回调函数
         callbacks.add_integration_callbacks(self)
 
+        # 运行时候的参数放这里
         self.fire_flag = False  # 是否识别到火焰
         self.isFirstTTS = True  # 是否为第一次识别到火焰
-
-        # 运行时候的参数放这里
         self.start_time = 0  # 拿来算FPS的计数变量
         self.count = 0
         self.sum_of_count = 0
@@ -145,10 +144,9 @@ class YoloPredictor(BasePredictor, QObject):
 
             # 开始检测
             print('开始检测！')
-            count = 0  # 运行定位帧
-            start_time = time.time()  # 用于计算帧率
-            batch = iter(self.dataset)
-
+            # count = 0  # 运行定位帧
+            # start_time = time.time()  # 用于计算帧率
+            # batch = iter(self.dataset)
             while True:
                 # 终止检测
                 if self.stop_dtc:
@@ -290,87 +288,92 @@ class YoloPredictor(BasePredictor, QObject):
     def get_annotator(self, img):
         return Annotator(img, line_width=self.args.line_thickness, example=str(self.model.names))
 
-    # 图像预处理
-    def preprocess(self, img):
-        img = torch.from_numpy(img).to(self.model.device)
-        img = img.half() if self.model.fp16 else img.float()  # # uint8 转为 fp16/32
-        img /= 255  # 0 - 255 转为 0.0 - 1.0
-        return img
-
-    # 预测结果后处理
-    def postprocess(self, preds, img, orig_img):
-        ### important
-        preds = ops.non_max_suppression(preds,
-                                        self.conf_thres,
-                                        self.iou_thres,
-                                        agnostic=self.args.agnostic_nms,
-                                        max_det=self.args.max_det,
-                                        classes=self.args.classes)
-
-        results = []
-        for i, pred in enumerate(preds):
-            orig_img = orig_img[i] if isinstance(orig_img, list) else orig_img
-            shape = orig_img.shape
-            pred[:, :4] = ops.scale_boxes(img.shape[2:], pred[:, :4], shape).round()
-            path, _, _, _, _ = self.batch
-            img_path = path[i] if isinstance(path, list) else path
-            results.append(Results(orig_img=orig_img, path=img_path, names=self.model.names, boxes=pred))
-        return results
+    # # 图像预处理
+    # def preprocess(self, img):
+    #     img = torch.from_numpy(img).to(self.model.device)
+    #     img = img.half() if self.model.fp16 else img.float()  # # uint8 转为 fp16/32
+    #     img /= 255  # 0 - 255 转为 0.0 - 1.0
+    #     return img
+    #
+    # # 预测结果后处理
+    # def postprocess(self, preds, img, orig_img):
+    #     ### important
+    #     preds = ops.non_max_suppression(preds,
+    #                                     self.conf_thres,
+    #                                     self.iou_thres,
+    #                                     agnostic=self.args.agnostic_nms,
+    #                                     max_det=self.args.max_det,
+    #                                     classes=self.args.classes)
+    #
+    #     results = []
+    #     for i, pred in enumerate(preds):
+    #         orig_img = orig_img[i] if isinstance(orig_img, list) else orig_img
+    #         shape = orig_img.shape
+    #         pred[:, :4] = ops.scale_boxes(img.shape[2:], pred[:, :4], shape).round()
+    #         path, _, _, _, _ = self.batch
+    #         img_path = path[i] if isinstance(path, list) else path
+    #         results.append(Results(orig_img=orig_img, path=img_path, names=self.model.names, boxes=pred))
+    #     return results
 
     # 写入检测结果
-    def write_results(self, idx, results, batch):
-        p, im, im0 = batch
-        log_string = ''
-        if len(im.shape) == 3:
-            im = im[None]  # 为批次维度扩展
-        self.seen += 1
-        imc = im0.copy() if self.args.save_crop else im0
-        if self.source_type.webcam or self.source_type.from_img:  # batch_size >= 1         # attention
-            log_string += f'{idx}: '
-            frame = self.dataset.count
-        else:
-            frame = getattr(self.dataset, 'frame', 0)
-        self.data_path = p
-        self.txt_path = str(self.save_dir / 'labels' / p.stem) + ('' if self.dataset.mode == 'image' else f'_{frame}')
-        # log_string += '%gx%g ' % im.shape[2:]         # !!! don't add img size~
-        self.annotator = self.get_annotator(im0)
+    # def write_results(self, idx, results, batch):
+    #     p, im, im0 = batch
+    #     log_string = ''
+    #     if len(im.shape) == 3:
+    #         im = im[None]  # 为批次维度扩展
+    #     self.seen += 1
+    #     imc = im0.copy() if self.args.save_crop else im0
+    #     if self.source_type.webcam or self.source_type.from_img:  # batch_size >= 1         # attention
+    #         log_string += f'{idx}: '
+    #         frame = self.dataset.count
+    #     else:
+    #         frame = getattr(self.dataset, 'frame', 0)
+    #     self.data_path = p
+    #     self.txt_path = str(self.save_dir / 'labels' / p.stem) + ('' if self.dataset.mode == 'image' else f'_{frame}')
+    #     # log_string += '%gx%g ' % im.shape[2:]         # !!! don't add img size~
+    #     self.annotator = self.get_annotator(im0)
+    #
+    #     det = results[idx].boxes  # TODO: make boxes inherit from tensors
+    #
+    #     if len(det) == 0:
+    #         return f'{log_string}(no detections), '  # if no, send this~~
+    #
+    #     for c in det.cls.unique():
+    #         n = (det.cls == c).sum()  # detections per class
+    #         log_string += f"{n}~{self.model.names[int(c)]},"  # {'s' * (n > 1)}, "   # don't add 's'
+    #     # now log_string is the classes 👆
+    #
+    #     # 写
+    #     for d in reversed(det):
+    #         cls, conf = d.cls.squeeze(), d.conf.squeeze()
+    #         if self.save_txt:  # 写入文件
+    #             line = (cls, *(d.xywhn.view(-1).tolist()), conf) \
+    #                 if self.args.save_conf else (cls, *(d.xywhn.view(-1).tolist()))  # label format
+    #             with open(f'{self.txt_path}.txt', 'a') as f:
+    #                 f.write(('%g ' * len(line)).rstrip() % line + '\n')
+    #         if self.save_res or self.args.save_crop or self.args.show or True:  # Add bbox to image(must)
+    #             c = int(cls)  # integer class
+    #             name = f'id:{int(d.id.item())} {self.model.names[c]}' if d.id is not None else self.model.names[c]
+    #             label = None if self.args.hide_labels else (name if self.args.hide_conf else f'{name} {conf:.2f}')
+    #             self.annotator.box_label(d.xyxy.squeeze(), label, color=colors(c, True))
+    #         if self.args.save_crop:
+    #             save_one_box(d.xyxy,
+    #                          imc,
+    #                          file=self.save_dir / 'crops' / self.model.model.names[c] / f'{self.data_path.stem}.jpg',
+    #                          BGR=True)
+    #
+    #     return log_string
 
-        det = results[idx].boxes  # TODO: make boxes inherit from tensors
 
-        if len(det) == 0:
-            return f'{log_string}(no detections), '  # if no, send this~~
-
-        for c in det.cls.unique():
-            n = (det.cls == c).sum()  # detections per class
-            log_string += f"{n}~{self.model.names[int(c)]},"  # {'s' * (n > 1)}, "   # don't add 's'
-        # now log_string is the classes 👆
-
-        # 写
-        for d in reversed(det):
-            cls, conf = d.cls.squeeze(), d.conf.squeeze()
-            if self.save_txt:  # 写入文件
-                line = (cls, *(d.xywhn.view(-1).tolist()), conf) \
-                    if self.args.save_conf else (cls, *(d.xywhn.view(-1).tolist()))  # label format
-                with open(f'{self.txt_path}.txt', 'a') as f:
-                    f.write(('%g ' * len(line)).rstrip() % line + '\n')
-            if self.save_res or self.args.save_crop or self.args.show or True:  # Add bbox to image(must)
-                c = int(cls)  # integer class
-                name = f'id:{int(d.id.item())} {self.model.names[c]}' if d.id is not None else self.model.names[c]
-                label = None if self.args.hide_labels else (name if self.args.hide_conf else f'{name} {conf:.2f}')
-                self.annotator.box_label(d.xyxy.squeeze(), label, color=colors(c, True))
-            if self.args.save_crop:
-                save_one_box(d.xyxy,
-                             imc,
-                             file=self.save_dir / 'crops' / self.model.model.names[c] / f'{self.data_path.stem}.jpg',
-                             BGR=True)
-
-        return log_string
-
-        # 释放摄像头
+    # 释放摄像头
     def release_capture(self):
         LoadStreams.capture = 'release'  # 这里是为了终止使用摄像头检测函数的线程，改了yolo源码
     # 不确定是不是这个包，报错进行更换
 
     def get_class_number(self):
-        # 只识别火焰
+        # 只识别火焰，则返回1即可
         return 1
+
+    # 用于确定是否为数字，若source是数字，则为摄像头
+    def is_number(self, x):
+        return isinstance(x, (int, float, complex))

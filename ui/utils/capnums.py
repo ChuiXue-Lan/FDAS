@@ -13,10 +13,8 @@ class Camera:
             grabbed = stream.grab()  # 尝试从该设备获取一帧图像
             stream.release()  # 释放视频流对象
             if not grabbed:  # 如果无法获取到图像，则说明该设备不可用
-                print(1)
                 continue  # 循环继续，跳过本次循环
             else:  # 如果能够获取到图像，则说明该设备可用
-                print(2)
                 cnt = cnt + 1  # 对可用设备计数器进行自增
                 devices.append(device)  # 将可用设备的编号添加到devices列表中
         return cnt, devices  # 返回可用设备数量和设备列表
