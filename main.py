@@ -204,10 +204,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 f.write(config_json)
             self.stop()
 
-    # 选择摄像头源
-    # def chose_cam(self):
-    #     self.yolo_predict.camera_run()
-
     # camera选择
     def camera_select(self):
         # try:
@@ -255,7 +251,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.rtsp_window = Window()
         config_file = 'config/ip.json'
         if not os.path.exists(config_file):
-            ip = 'rtsp://admin:123456@192.168.0.106:8554/h264_ulaw.sdp'
+            ip = 'rtsp://admin:123456@192.168.0.106:8554/live'
             new_config = {"ip": ip}
             new_json = json.dumps(new_config, ensure_ascii=False, indent=2)
             with open(config_file, 'w', encoding='utf-8') as f:

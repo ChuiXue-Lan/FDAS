@@ -272,17 +272,17 @@ class YoloPredictor(BasePredictor, QObject):
     #     self.yolo2main_class_num.emit(class_nums)
     #     self.yolo2main_target_num.emit(target_nums)
 
-    def warmup_models(self):
-        # 热身模型
-        if not self.done_warmup:
-            # 调用模型的 warmup 函数，其中 imgsz 参数为输入图像的大小
-            # 如果模型使用 PyTorch，imgsz 参数应为 [batch_size, channels, height, width]
-            # 如果模型使用 Triton，imgsz 参数应为 [height, width, channels, batch_size]
-            self.model.warmup(
-                imgsz=(1 if self.model.pt or self.model.triton else self.dataset.bs, 3, *self.imgsz))
-            # 将 done_warmup 标记为 True，以标记模型已经热身过
-            self.done_warmup = True
-            print('热身完毕')
+    # def warmup_models(self):
+    #     # 热身模型
+    #     if not self.done_warmup:
+    #         # 调用模型的 warmup 函数，其中 imgsz 参数为输入图像的大小
+    #         # 如果模型使用 PyTorch，imgsz 参数应为 [batch_size, channels, height, width]
+    #         # 如果模型使用 Triton，imgsz 参数应为 [height, width, channels, batch_size]
+    #         self.model.warmup(
+    #             imgsz=(1 if self.model.pt or self.model.triton else self.dataset.bs, 3, *self.imgsz))
+    #         # 将 done_warmup 标记为 True，以标记模型已经热身过
+    #         self.done_warmup = True
+    #         print('热身完毕')
 
     # 获取 Annotator 实例
     def get_annotator(self, img):
@@ -373,7 +373,3 @@ class YoloPredictor(BasePredictor, QObject):
     def get_class_number(self):
         # 只识别火焰，则返回1即可
         return 1
-
-    # 用于确定是否为数字，若source是数字，则为摄像头
-    def is_number(self, x):
-        return isinstance(x, (int, float, complex))

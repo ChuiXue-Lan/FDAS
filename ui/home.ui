@@ -183,7 +183,7 @@ border-radius:10px</string>
 color: rgba(255, 255, 255, 255);</string>
              </property>
              <property name="text">
-              <string>By javier</string>
+              <string>By 吹雪</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
