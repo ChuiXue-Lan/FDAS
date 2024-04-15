@@ -10,10 +10,12 @@ import pyttsx3
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMenu
 from PySide6.QtGui import QImage, QPixmap, QColor
 from PySide6.QtCore import QTimer, QThread, Signal, QObject, QPoint, Qt
+
 import classes.yolo
 from classes.camera import Camera
+from classes.email_plain_text import EmailPlainText
 from ui.CustomMessageBox import MessageBox
-from ui.home import Ui_MainWindow
+from ui.home_test import Ui_MainWindow
 import json
 import sys
 import cv2
@@ -52,6 +54,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 语音警示
         self.engine = pyttsx3.init()  # 语音警示
         self.engine_switch = True  # 循环警告
+        # 邮件发送
+        self.email_send_switch = True
 
         # 摄像头选择
         self.camIndex = 0  # 默认为0号（本机）摄像头
@@ -62,7 +66,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.select_model = self.model_box.currentText()  # 默认模型
         self.yolo_predict.new_model_name = "./models/%s" % self.select_model
         self.yolo_thread = QThread()  # 创建Yolo线程
-        self.yolo_predict.yolo2main_pre_img.connect(lambda x: self.show_image(x, self.pre_video))
+        # self.yolo_predict.yolo2main_pre_img.connect(lambda x: self.show_image(x, self.pre_video))
         self.yolo_predict.yolo2main_res_img.connect(lambda x: self.show_image(x, self.res_video))
         self.yolo_predict.yolo2main_status_msg.connect(lambda x: self.show_status(x))
         self.yolo_predict.yolo2main_fps.connect(lambda x: self.fps_label.setText(x))
@@ -72,6 +76,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.yolo_predict.yolo2main_progress.connect(lambda x: self.progress_bar.setValue(x))
         self.yolo_predict.yolo2main_tts_dialog.connect(self.voice_announcement)
         self.yolo_predict.yolo2main_tts.connect(self.tts)
+        self.yolo_predict.yolo2main_email_send.connect(self.email_send)
         self.main2yolo_begin_sgl.connect(self.yolo_predict.run)
         self.yolo_predict.moveToThread(self.yolo_thread)
 
@@ -178,7 +183,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.progress_bar.setValue(0)
             if self.yolo_thread.isRunning():
                 self.yolo_thread.quit()  # 结束进程
-            self.pre_video.clear()  # 清空图像显示
+            # self.pre_video.clear()  # 清空图像显示
             self.res_video.clear()
             self.Class_num.setText('--')
             self.Target_num.setText('--')
@@ -272,18 +277,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.TTS_window.cancelButton.clicked.connect(lambda: self.close_tts_dialog(self.TTS_window))
 
     def tts_dialog_show(self):
-        self.TTS_window.exec()
+        self.TTS_window.show()
 
+    # 语音播报
     def tts(self):
-        # 语音警告线程
-        tts_thread = threading.Thread(target=self.speak)
-        tts_thread.start()
+        def speak():
+            self.engine_switch = True  # 开启播报
+            while self.engine_switch:
+                self.engine.say('警告！发现火源！')
+                self.engine.runAndWait()
 
-    def speak(self):
-        self.engine_switch = True  # 开启播报
-        while self.engine_switch:
-            self.engine.say('警告！发现火源！')
-            self.engine.runAndWait()
+        # 语音警告线程
+        tts_thread = threading.Thread(target=speak)
+        tts_thread.start()
 
     def check_fire(self, TTS_window):
         self.engine_switch = False
@@ -298,6 +304,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.yolo_predict.fire_flag = False  # 是否识别到火焰
         self.yolo_predict.isFirstTTS = True  # 是否为第一次识别到火焰
         TTS_window.close()
+
+    # 邮件发送
+    def email_send(self):
+        email_plain_text = EmailPlainText()
+        def send_email():
+            if self.email_send_switch:
+                print("发送邮件！")
+                # email_plain_text.email_send()
+                self.email_send_switch = False
+
+        email_thread = threading.Thread(target=send_email)
+        email_thread.start()
 
     # 加载网络源
     def load_rtsp(self, ip):
@@ -382,7 +400,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.run_button.setChecked(False)  # 恢复启动键
         self.save_res_button.setEnabled(True)  # 可以使用保存按钮
         self.save_txt_button.setEnabled(True)  # 可以使用保存按钮
-        self.pre_video.clear()  # 清空图像显示
+        # self.pre_video.clear()  # 清空图像显示
         self.res_video.clear()  # 清空图像显示
         self.progress_bar.setValue(0)
         self.Class_num.setText('--')

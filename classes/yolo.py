@@ -42,7 +42,8 @@ class YoloPredictor(BasePredictor, QObject):
     yolo2main_class_num = Signal(int)  # 检测到的类别数
     yolo2main_target_num = Signal(int)  # 检测到的目标数
     yolo2main_tts_dialog = Signal(int)  # 火源警告对话框
-    yolo2main_tts = Signal(int) # 火源警告
+    yolo2main_tts = Signal(int)  # 火源警告
+    yolo2main_email_send = Signal()  # 邮件发送
 
     def __init__(self, cfg=DEFAULT_CFG, overrides=None):
         super(YoloPredictor, self).__init__()
@@ -251,6 +252,7 @@ class YoloPredictor(BasePredictor, QObject):
                 self.isFirstTTS = False
                 self.yolo2main_tts_dialog.emit(1)
                 self.yolo2main_tts.emit(1)
+                self.yolo2main_email_send.emit()
 
         # 进度条
         if '0' in self.source or 'rtsp' in self.source:
