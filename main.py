@@ -6,12 +6,16 @@
 # @Describe:
 # -*- encoding:utf-8 -*-
 import threading
+import time
+import datetime
+
 import pyttsx3
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMenu
 from PySide6.QtGui import QImage, QPixmap, QColor
 from PySide6.QtCore import QTimer, QThread, Signal, QObject, QPoint, Qt
 
 import classes.yolo
+from classes import email_tools
 from classes.camera import Camera
 from classes.email_plain_text import EmailPlainText
 from ui.CustomMessageBox import MessageBox
@@ -294,8 +298,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def check_fire(self, TTS_window):
         self.engine_switch = False
         # 恢复现场
-        self.yolo_predict.fire_flag = False  # 是否识别到火焰
-        self.yolo_predict.isFirstTTS = True  # 是否为第一次识别到火焰
+        # self.yolo_predict.fire_flag = False  # 是否识别到火焰
+        # self.yolo_predict.isFirstTTS = True  # 是否为第一次识别到火焰
         TTS_window.close()
 
     def close_tts_dialog(self, TTS_window):
@@ -303,15 +307,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 恢复现场
         self.yolo_predict.fire_flag = False  # 是否识别到火焰
         self.yolo_predict.isFirstTTS = True  # 是否为第一次识别到火焰
+        self.yolo_predict.email_send_switch = True
         TTS_window.close()
 
     # 邮件发送
     def email_send(self):
         email_plain_text = EmailPlainText()
+
         def send_email():
+            # 生成视频
+            self.yolo_predict.get_mp4()
+            # 发送邮件
             if self.email_send_switch:
                 print("发送邮件！")
-                # email_plain_text.email_send()
+                # email_plain_text.email_send()  # 纯文本
+                email_tools.email_send()  # 含截取视频附件
                 self.email_send_switch = False
 
         email_thread = threading.Thread(target=send_email)
